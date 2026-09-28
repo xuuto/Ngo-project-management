@@ -1,0 +1,6 @@
+{
+  "name": "PENHA NGO Project & Donor Management System",
+  "description": "Enterprise project management, logframe M&E, fund utilization metrics, and automated donor reporting platform for PENHA Hargeisa Field Office and Horn of Africa humanitarian operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
