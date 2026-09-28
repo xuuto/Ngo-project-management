@@ -12,7 +12,10 @@ import {
   ArrowRight,
   Shield,
   FileCheck,
-  CheckCircle2
+  CheckCircle2,
+  Target,
+  Flag,
+  AlertTriangle
 } from 'lucide-react';
 import { Project, ProjectStatus, SectorPillar } from '../types/ngo';
 import { useAuth } from '../context/AuthContext';
@@ -228,6 +231,38 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                       <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${actProgress}%` }} />
                     </div>
                   </div>
+
+                  {/* Milestones Progress Bar */}
+                  {(() => {
+                    const msList = p.milestones || [];
+                    const totalMs = msList.length;
+                    const achievedMs = msList.filter(m => m.status === 'Achieved').length;
+                    const delayedMs = msList.filter(m => m.status === 'Delayed' || m.status === 'Critical').length;
+                    const msPercent = totalMs > 0 ? Math.round((achievedMs / totalMs) * 100) : 0;
+
+                    return (
+                      <div>
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="text-slate-500 font-medium flex items-center gap-1">
+                            <Target className="w-3 h-3 text-emerald-700" />
+                            <span>Milestones &amp; Gates:</span>
+                          </span>
+                          <span className="font-mono font-bold text-emerald-800 flex items-center gap-1.5">
+                            {achievedMs} / {totalMs} Gates ({msPercent}%)
+                            {delayedMs > 0 && (
+                              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-0.5 animate-pulse">
+                                <AlertTriangle className="w-2.5 h-2.5 text-rose-600" />
+                                {delayedMs} Delayed
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden flex">
+                          <div className="bg-emerald-600 h-1.5 rounded-full transition-all" style={{ width: `${msPercent}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 

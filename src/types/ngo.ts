@@ -93,6 +93,9 @@ export interface BudgetLineItem {
   totalAllocatedUSD: number;
   spentUSD: number;
   notes?: string;
+  managementIntervention?: string;
+  interventionDate?: string;
+  interventionBy?: string;
 }
 
 export interface FundInflow {
@@ -175,13 +178,60 @@ export interface FieldEvidence {
   verifiedStatus: 'Audited & Verified' | 'Field Reported' | 'Requires Verification';
 }
 
+export type RiskSeverity = 'Low' | 'Medium' | 'High' | 'Severe';
+export type RiskCategory = 
+  | 'Access & Security'
+  | 'Environmental / Drought'
+  | 'Market & Price Fluctuations'
+  | 'Institutional & Governance'
+  | 'Operational & Logistics'
+  | 'Financial & Compliance';
+
+export type RiskStatus = 'Active Monitoring' | 'Mitigated' | 'Escalated';
+
+export type MilestoneStatus = 'Pending' | 'In Progress' | 'Achieved' | 'Delayed' | 'Critical';
+
+export type MilestoneCategory =
+  | 'Key Delivery'
+  | 'M&E Review'
+  | 'Procurement & Works'
+  | 'Donor Deliverable'
+  | 'Field Checkpoint'
+  | 'Community Handover';
+
+export interface Milestone {
+  id: string;
+  projectId: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  completionDate?: string;
+  status: MilestoneStatus;
+  category: MilestoneCategory;
+  assignedLead?: string;
+  isCriticalCheckpoint: boolean;
+  verificationCriteria?: string;
+  weightPercent?: number;
+  notes?: string;
+}
+
 export interface RiskItem {
   id: string;
+  projectId?: string;
+  projectCode?: string;
+  projectTitle?: string;
   description: string;
-  riskLevel: 'Low' | 'Medium' | 'High' | 'Severe';
-  category: 'Environmental / Drought' | 'Market & Price Fluctuations' | 'Access & Security' | 'Institutional & Governance';
+  riskLevel: RiskSeverity;
+  category: RiskCategory;
   mitigationPlan: string;
-  status: 'Active Monitoring' | 'Mitigated' | 'Escalated';
+  status: RiskStatus;
+  likelihood?: 'Rare' | 'Unlikely' | 'Possible' | 'Likely' | 'Almost Certain';
+  impact?: 'Insignificant' | 'Minor' | 'Moderate' | 'Major' | 'Critical';
+  humanitarianImpactArea?: 'Food & Fodder Delivery' | 'Water Supply Pumping' | 'Cash Transfers (Zaad/Sahal)' | 'Staff & Asset Security' | 'Cross-Border Access' | 'Medical / Cold-Chain Storage';
+  assignedFocalPoint?: string;
+  dateIdentified?: string;
+  lastReviewDate?: string;
+  earlyWarningTriggers?: string;
 }
 
 export interface Donor {
@@ -242,6 +292,7 @@ export interface Project {
   beneficiaries: BeneficiaryMetrics;
   fieldEvidences: FieldEvidence[];
   risks: RiskItem[];
+  milestones: Milestone[];
 }
 
 export interface DonorReport {

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Shield, ChevronDown, UserCircle, RefreshCw, KeyRound, DollarSign } from 'lucide-react';
+import { Shield, ChevronDown, UserCircle, RefreshCw, KeyRound, DollarSign, Bell, Compass, ShieldCheck, FolderOpen, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { PermissionsMatrixModal } from './modals/PermissionsMatrixModal';
+import { NotificationPopover } from './NotificationPopover';
+import { MilestoneNotification } from '../types/notification';
 
 interface HeaderProps {
   activeView: string;
@@ -11,6 +13,15 @@ interface HeaderProps {
   onResetData: () => void;
   onOpenNewProjectModal?: () => void;
   onOpenExpenseModal?: () => void;
+  notifications?: MilestoneNotification[];
+  onMarkRead?: (id: string) => void;
+  onMarkAllRead?: () => void;
+  onAcknowledge?: (id: string) => void;
+  onSelectProject?: (projectId: string) => void;
+  onOpenMilestoneAlertsModal?: () => void;
+  onRunDailyCheck?: () => void;
+  onMarkAchievedDirect?: (milestoneId: string, projectId: string) => void;
+  onToggleUrgent?: (id: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -20,11 +31,23 @@ export const Header: React.FC<HeaderProps> = ({
   setCurrencyMode,
   onResetData,
   onOpenNewProjectModal,
-  onOpenExpenseModal
+  onOpenExpenseModal,
+  notifications = [],
+  onMarkRead = () => {},
+  onMarkAllRead = () => {},
+  onAcknowledge = () => {},
+  onSelectProject = () => {},
+  onOpenMilestoneAlertsModal = () => {},
+  onRunDailyCheck = () => {},
+  onMarkAchievedDirect = () => {},
+  onToggleUrgent = () => {}
 }) => {
   const { currentUser, switchUserById, allUsers, hasPermission } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMatrixModal, setShowMatrixModal] = useState(false);
+  const [showNotificationPopover, setShowNotificationPopover] = useState(false);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -36,6 +59,8 @@ export const Header: React.FC<HeaderProps> = ({
         return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       case 'Donor':
         return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'Finance Officer':
+        return 'bg-rose-100 text-rose-800 border-rose-200';
       default:
         return 'bg-slate-100 text-slate-800 border-slate-200';
     }
@@ -120,6 +145,17 @@ export const Header: React.FC<HeaderProps> = ({
                 Donor Reports &amp; M&amp;E
               </button>
               <button
+                onClick={() => setActiveView('risks')}
+                className={`px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+                  activeView === 'risks'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5 text-rose-500" />
+                <span>Risk Safeguards</span>
+              </button>
+              <button
                 onClick={() => setActiveView('beneficiaries')}
                 className={`px-3 py-1.5 rounded-md transition-colors ${
                   activeView === 'beneficiaries'
@@ -128,6 +164,50 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 Beneficiaries &amp; Cash
+              </button>
+              <button
+                onClick={() => setActiveView('regional-map')}
+                className={`px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+                  activeView === 'regional-map'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5 text-emerald-600" />
+                <span>GIS Map &amp; Regions</span>
+              </button>
+              <button
+                onClick={() => setActiveView('audit')}
+                className={`px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+                  activeView === 'audit'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+                <span>Audit &amp; Compliance</span>
+              </button>
+              <button
+                onClick={() => setActiveView('documents')}
+                className={`px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+                  activeView === 'documents'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <FolderOpen className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Documents &amp; Vault</span>
+              </button>
+              <button
+                onClick={() => setActiveView('approvals')}
+                className={`px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+                  activeView === 'approvals'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
+                <span>Approvals</span>
               </button>
             </nav>
 
@@ -152,6 +232,45 @@ export const Header: React.FC<HeaderProps> = ({
                 <KeyRound className="w-3.5 h-3.5 text-emerald-700" />
                 <span className="hidden xl:inline">Permissions</span> Matrix
               </button>
+
+              {/* Milestone Overdue Notifications Bell Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotificationPopover(!showNotificationPopover)}
+                  title="Overdue Milestone PM Notifications & Background Checker"
+                  className={`relative p-2 rounded-lg border transition-all ${
+                    notifications.length > 0
+                      ? 'border-rose-200 bg-rose-50/50 hover:bg-rose-100/60 text-rose-800'
+                      : 'border-slate-200 hover:bg-slate-50 text-slate-600'
+                  }`}
+                >
+                  <Bell className="w-4 h-4 text-slate-700" />
+                  {unreadCount > 0 ? (
+                    <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center font-mono shadow-xs animate-pulse">
+                      {unreadCount}
+                    </span>
+                  ) : notifications.length > 0 ? (
+                    <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-[9px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center font-mono shadow-xs">
+                      {notifications.length}
+                    </span>
+                  ) : null}
+                </button>
+
+                <NotificationPopover
+                  notifications={notifications}
+                  isOpen={showNotificationPopover}
+                  onClose={() => setShowNotificationPopover(false)}
+                  onMarkRead={onMarkRead}
+                  onMarkAllRead={onMarkAllRead}
+                  onAcknowledge={onAcknowledge}
+                  onSelectProject={onSelectProject}
+                  onOpenMilestoneAlertsModal={onOpenMilestoneAlertsModal}
+                  onRunDailyCheck={onRunDailyCheck}
+                  onMarkAchievedDirect={onMarkAchievedDirect}
+                  currentUserName={currentUser.name}
+                  onToggleUrgent={onToggleUrgent}
+                />
+              </div>
 
               {/* Persona / Role Selector */}
               <div className="relative">

@@ -200,6 +200,33 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           mitigationPlan: 'Contour soil moisture bunding and emergency fodder reserves.',
           status: 'Active Monitoring'
         }
+      ],
+      milestones: [
+        {
+          id: `ms-${Date.now()}-1`,
+          projectId: `proj-${Date.now()}`,
+          title: 'Project Inception & Baseline Survey',
+          description: 'Socio-economic baseline survey and community consultation meetings.',
+          dueDate: startDate,
+          completionDate: startDate,
+          status: 'Achieved',
+          category: 'M&E Review',
+          assignedLead: managerName,
+          isCriticalCheckpoint: true,
+          verificationCriteria: 'Signed baseline survey report and community meeting minutes'
+        },
+        {
+          id: `ms-${Date.now()}-2`,
+          projectId: `proj-${Date.now()}`,
+          title: 'Mid-Term Review & Field Verification Audit',
+          description: 'Mid-term progress review and field indicator verification.',
+          dueDate: '2026-06-30',
+          status: 'In Progress',
+          category: 'Key Delivery',
+          assignedLead: managerName,
+          isCriticalCheckpoint: true,
+          verificationCriteria: 'Mid-term technical audit report and indicator verification logs'
+        }
       ]
     };
 

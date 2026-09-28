@@ -5,3 +5,4 @@ export { ActivityModal } from '../../components/modals/ActivityModal';
 export { IndicatorModal } from '../../components/modals/IndicatorModal';
 export { BudgetLineModal } from '../../components/modals/BudgetLineModal';
 export { EvidenceModal } from '../../components/modals/EvidenceModal';
+export { MilestoneModal } from '../../components/modals/MilestoneModal';

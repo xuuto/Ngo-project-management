@@ -249,8 +249,12 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
             <span className="text-slate-700 font-medium">Projected Budget (Grant Ceiling)</span>
           </div>
           <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-xs bg-cyan-500 shrink-0"></span>
+            <span className="text-slate-700 font-bold">Slow-Moving (&lt;20%)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-xs bg-emerald-600 shrink-0"></span>
-            <span className="text-slate-700 font-medium">Actual Expended (&lt;85%)</span>
+            <span className="text-slate-700 font-medium">Actual Expended (20% - 85%)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-xs bg-amber-500 shrink-0"></span>
@@ -289,6 +293,10 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                     <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#1e293b" />
                       <stop offset="100%" stopColor="#334155" />
+                    </linearGradient>
+                    <linearGradient id="spentLowBurnGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#0891b2" />
+                      <stop offset="100%" stopColor="#06b6d4" />
                     </linearGradient>
                     <linearGradient id="spentNormalGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#059669" />
@@ -350,6 +358,7 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                     const spentUSD = p.budgetSummary.expendituresUSD;
                     const commUSD = p.budgetSummary.commitmentsUSD || 0;
                     const burnRate = p.budgetSummary.burnRatePercent;
+                    const isLowBurn = burnRate < 20;
 
                     const budgetHeight = Math.max(4, (budgetUSD / maxScaleValue) * 240);
                     const spentHeight = Math.max(4, (spentUSD / maxScaleValue) * 240);
@@ -363,6 +372,8 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                         ? 'url(#spentDangerGrad)'
                         : burnRate >= 85
                         ? 'url(#spentWarningGrad)'
+                        : isLowBurn
+                        ? 'url(#spentLowBurnGrad)'
                         : 'url(#spentNormalGrad)';
 
                     return (
@@ -430,11 +441,25 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                           textAnchor="middle"
                           fontSize="9"
                           fontWeight="bold"
-                          fill={burnRate > 90 ? '#dc2626' : '#1e293b'}
+                          fill={burnRate > 90 ? '#dc2626' : isLowBurn ? '#0891b2' : '#1e293b'}
                           fontFamily="monospace"
                         >
                           {burnRate.toFixed(0)}%
                         </text>
+
+                        {/* Low Burn indicator tag */}
+                        {isLowBurn && (
+                          <text
+                            x={groupX + barW + 4 + barW / 2}
+                            y={Math.max(6, 270 - spentHeight - 16)}
+                            textAnchor="middle"
+                            fontSize="7.5"
+                            fontWeight="bold"
+                            fill="#0891b2"
+                          >
+                            SLOW
+                          </text>
+                        )}
 
                         {/* High Burn Alert Icon */}
                         {burnRate > 90 && (
@@ -548,6 +573,7 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
               const commWidthPct = Math.min(100 - spentWidthPct, (commUSD / budgetUSD) * 100);
 
               const isHighBurn = burnRate > 90;
+              const isLowBurn = burnRate < 20;
 
               return (
                 <div
@@ -556,6 +582,8 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                   className={`p-4 rounded-xl border transition-all cursor-pointer ${
                     isHighBurn
                       ? 'border-rose-300 bg-rose-50/20 hover:border-rose-400 shadow-2xs'
+                      : isLowBurn
+                      ? 'border-cyan-200 bg-cyan-50/20 hover:border-cyan-300 shadow-2xs'
                       : 'border-slate-200 bg-slate-50/40 hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
@@ -572,6 +600,11 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                           High Burn Alert &gt;90%
                         </span>
                       )}
+                      {isLowBurn && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-600 text-white">
+                          Slow-Moving &lt;20%
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3 text-xs">
@@ -582,6 +615,8 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                       <span className={`px-2 py-0.5 rounded-full font-mono text-xs font-bold ${
                         isHighBurn
                           ? 'bg-rose-100 text-rose-800'
+                          : isLowBurn
+                          ? 'bg-cyan-100 text-cyan-900'
                           : burnRate >= 85
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-emerald-100 text-emerald-800'
@@ -598,6 +633,8 @@ export const ExpenditureVsBudgetChart: React.FC<ExpenditureVsBudgetChartProps> =
                       className={`h-full transition-all duration-500 ${
                         isHighBurn
                           ? 'bg-rose-600'
+                          : isLowBurn
+                          ? 'bg-cyan-600'
                           : burnRate >= 85
                           ? 'bg-amber-500'
                           : 'bg-emerald-600'

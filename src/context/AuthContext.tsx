@@ -124,6 +124,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return 'Field Officer / Team Member mode. Viewing assigned operational tasks and field M&E logs. Financial editing is restricted.';
       case 'Donor':
         return `Donor Oversight Portal (${currentUser.organization}). Read-only access to funded grants, M&E impact verification, and donor reports.`;
+      case 'Finance Officer':
+        return 'Senior Finance & Compliance Officer mode. Authority to audit expense vouchers, manage bank accounts, and approve final disbursements.';
       default:
         return '';
     }

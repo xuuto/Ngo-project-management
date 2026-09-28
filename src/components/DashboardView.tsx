@@ -19,9 +19,12 @@ import {
   ShieldAlert,
   ChevronDown,
   ChevronUp,
-  ArrowRight
+  ArrowRight,
+  TrendingDown,
+  Flag,
+  X
 } from 'lucide-react';
-import { Project, Donor, ExpenseRecord, FundInflow, DonorReport } from '../types/ngo';
+import { Project, Donor, ExpenseRecord, FundInflow, DonorReport, Milestone } from '../types/ngo';
 import { useAuth } from '../context/AuthContext';
 import { formatUSD, formatSLSH, formatPercent, formatDate, formatNumber, exportToCSV } from '../utils/formatters';
 import { ExpenditureVsBudgetChart } from '../features/dashboard/components/ExpenditureVsBudgetChart';
@@ -36,6 +39,7 @@ interface DashboardViewProps {
   onSelectProject: (projectId: string) => void;
   onOpenReportModal?: (projectId?: string) => void;
   onViewReport: (report: DonorReport) => void;
+  onOpenExecutivePDF?: () => void;
   setActiveView: (view: string) => void;
 }
 
@@ -51,6 +55,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onSelectProject,
   onOpenReportModal,
   onViewReport,
+  onOpenExecutivePDF,
   setActiveView
 }) => {
   const { currentUser, filterAccessibleProjects, filterAccessibleExpenses, filterAccessibleReports, hasPermission } = useAuth();
@@ -67,18 +72,51 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const [selectedDonorFilter, setSelectedDonorFilter] = useState<string>('all');
 
   // Compliance Alerts State
-  const [alertFilter, setAlertFilter] = useState<'all' | 'high_burn' | 'approaching_end'>('all');
+  const [alertFilter, setAlertFilter] = useState<'all' | 'high_burn' | 'low_burn' | 'approaching_end'>('all');
   const [isAlertsCollapsed, setIsAlertsCollapsed] = useState(false);
   const [dismissedAlertIds, setDismissedAlertIds] = useState<string[]>([]);
+  const [isMilestoneAlertDismissed, setIsMilestoneAlertDismissed] = useState(false);
 
-  // Compliance & Grant Expiry Alerts Analysis
+  // Compliance, Low Burn & Grant Expiry Alerts Analysis
   const todayRef = useMemo(() => new Date('2026-09-27'), []);
+
+  // Upcoming Milestone Deadline Analysis (Due within next 7 days or overdue)
+  const upcomingMilestones7Days = useMemo(() => {
+    const list: Array<{
+      milestone: Milestone;
+      project: Project;
+      daysRemaining: number;
+      isOverdue: boolean;
+    }> = [];
+
+    accessibleProjects.forEach((p) => {
+      const msList = p.milestones || [];
+      msList.forEach((ms) => {
+        if (ms.status === 'Achieved') return;
+
+        const dueObj = new Date(ms.dueDate);
+        const diffMs = dueObj.getTime() - todayRef.getTime();
+        const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        if (daysRemaining <= 7) {
+          list.push({
+            milestone: ms,
+            project: p,
+            daysRemaining,
+            isOverdue: daysRemaining < 0
+          });
+        }
+      });
+    });
+
+    return list.sort((a, b) => a.daysRemaining - b.daysRemaining);
+  }, [accessibleProjects, todayRef]);
 
   const complianceAlerts = useMemo(() => {
     const list: Array<{
       id: string;
       project: Project;
-      types: ('high_burn' | 'approaching_end')[];
+      types: ('high_burn' | 'low_burn' | 'approaching_end')[];
       severity: 'critical' | 'warning';
       burnRatePercent: number;
       daysRemaining: number;
@@ -99,10 +137,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       const isApproachingEnd = daysRemaining <= 90 && p.status === 'Active';
       const isHighBurn = burnRate > 90;
+      const isLowBurn = burnRate < 20 && p.status === 'Active';
 
-      if (isHighBurn || isApproachingEnd) {
-        const types: ('high_burn' | 'approaching_end')[] = [];
+      if (isHighBurn || isLowBurn || isApproachingEnd) {
+        const types: ('high_burn' | 'low_burn' | 'approaching_end')[] = [];
         if (isHighBurn) types.push('high_burn');
+        if (isLowBurn) types.push('low_burn');
         if (isApproachingEnd) types.push('approaching_end');
 
         const severity: 'critical' | 'warning' =
@@ -121,6 +161,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               `Initiate formal donor budget realignment under approved ±10% variance clause before funds are exhausted.`
             );
           }
+        }
+
+        if (isLowBurn) {
+          recommendations.push(
+            `Slow-moving intervention: Budget utilization is only ${burnRate.toFixed(1)}% (<20% benchmark). Risk of severe activity slippage and unspent grant decommitment.`
+          );
+          recommendations.push(
+            `Convene emergency project review to unblock procurement bottlenecks, expedite field contracts in ${p.targetDistricts.join(', ')}, and accelerate community activities.`
+          );
         }
 
         if (isApproachingEnd) {
@@ -175,11 +224,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const filteredAlerts = useMemo(() => {
     if (alertFilter === 'all') return activeAlerts;
     if (alertFilter === 'high_burn') return activeAlerts.filter((a) => a.types.includes('high_burn'));
+    if (alertFilter === 'low_burn') return activeAlerts.filter((a) => a.types.includes('low_burn'));
     if (alertFilter === 'approaching_end') return activeAlerts.filter((a) => a.types.includes('approaching_end'));
     return activeAlerts;
   }, [activeAlerts, alertFilter]);
 
   const highBurnCount = useMemo(() => activeAlerts.filter((a) => a.types.includes('high_burn')).length, [activeAlerts]);
+  const lowBurnCount = useMemo(() => activeAlerts.filter((a) => a.types.includes('low_burn')).length, [activeAlerts]);
   const approachingEndCount = useMemo(() => activeAlerts.filter((a) => a.types.includes('approaching_end')).length, [activeAlerts]);
 
   // Filter expenses and metrics by date range
@@ -374,6 +425,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           )}
 
+          {onOpenExecutivePDF && (
+            <button
+              onClick={onOpenExecutivePDF}
+              title="Download consolidated executive dossier with burn rates and beneficiary counts as PDF"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold rounded-lg transition-colors shadow-xs cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Executive PDF Briefing</span>
+            </button>
+          )}
+
           <button
             onClick={handleExportDashboardSummary}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-medium rounded-lg transition-colors shadow-2xs"
@@ -383,6 +445,93 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* MILESTONE DEADLINE ALERT BANNER (DUE WITHIN 7 DAYS) */}
+      {!isMilestoneAlertDismissed && upcomingMilestones7Days.length > 0 && (
+        <div className="bg-gradient-to-r from-amber-600 via-amber-700 to-amber-800 text-white rounded-xl p-4 sm:p-5 shadow-md border border-amber-500 relative overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-lg bg-white/20 backdrop-blur-xs text-white shrink-0 mt-0.5">
+                <Target className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-extrabold uppercase tracking-wide">
+                    Milestone Deadline Alert — Action Required Within Next 7 Days
+                  </h3>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-white text-amber-950 font-mono shadow-2xs">
+                    {upcomingMilestones7Days.length} {upcomingMilestones7Days.length === 1 ? 'Checkpoint Imminent' : 'Checkpoints Imminent'}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-100 mt-1 leading-snug">
+                  The following mission-critical project delivery checkpoints are due or approaching deadline within 7 days. Prompt field verification and management review required.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsMilestoneAlertDismissed(true)}
+              className="text-amber-200 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors self-end md:self-auto shrink-0 cursor-pointer"
+              title="Dismiss Alert Banner"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Itemized Milestone Cards Grid */}
+          <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 relative z-10">
+            {upcomingMilestones7Days.map(({ milestone, project, daysRemaining, isOverdue }) => (
+              <div
+                key={milestone.id}
+                onClick={() => onSelectProject(project.id)}
+                className="bg-white text-slate-900 rounded-lg p-3 shadow-xs border border-amber-200 hover:border-amber-400 cursor-pointer transition-all hover:scale-[1.01] group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 text-[10px] font-mono mb-1">
+                    <span className="font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded">
+                      {project.code}
+                    </span>
+                    <span
+                      className={`font-bold px-1.5 py-0.5 rounded ${
+                        isOverdue
+                          ? 'bg-rose-600 text-white animate-pulse'
+                          : daysRemaining <= 2
+                          ? 'bg-rose-100 text-rose-800'
+                          : 'bg-amber-100 text-amber-900'
+                      }`}
+                    >
+                      {isOverdue
+                        ? `OVERDUE (${Math.abs(daysRemaining)}d)`
+                        : daysRemaining === 0
+                        ? 'DUE TODAY'
+                        : `Due in ${daysRemaining} ${daysRemaining === 1 ? 'day' : 'days'}`}
+                    </span>
+                  </div>
+
+                  <h4 className="text-xs font-bold text-slate-900 group-hover:text-amber-800 transition-colors line-clamp-2">
+                    {milestone.title}
+                  </h4>
+
+                  {milestone.isCriticalCheckpoint && (
+                    <div className="mt-1 flex items-center gap-1 text-[10px] font-bold text-amber-800">
+                      <Flag className="w-3 h-3 fill-amber-500 text-amber-600 shrink-0" />
+                      <span>Critical Delivery Gate</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                  <span className="truncate">Lead: <strong>{milestone.assignedLead || project.leadProjectManager.name}</strong></span>
+                  <span className="text-amber-800 font-bold flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                    <span>Inspect</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* COMPLIANCE & RISK ALERTS PANEL */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
@@ -446,6 +595,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 >
                   <TrendingUp className="w-3 h-3 text-rose-600" />
                   <span>High Burn &gt;90% ({highBurnCount})</span>
+                </button>
+                <button
+                  onClick={() => setAlertFilter('low_burn')}
+                  className={`px-2.5 py-1 rounded-md transition-colors flex items-center gap-1 ${
+                    alertFilter === 'low_burn'
+                      ? 'bg-white text-cyan-900 shadow-2xs font-bold'
+                      : 'text-slate-600 hover:text-cyan-800'
+                  }`}
+                >
+                  <TrendingDown className="w-3 h-3 text-cyan-600" />
+                  <span>Low Burn &lt;20% ({lowBurnCount})</span>
                 </button>
                 <button
                   onClick={() => setAlertFilter('approaching_end')}
@@ -527,6 +687,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-600 text-white shadow-2xs">
                               <TrendingUp className="w-3.5 h-3.5" />
                               High Burn Rate ({alert.burnRatePercent.toFixed(1)}% &gt; 90%)
+                            </span>
+                          )}
+                          {!isBoth && !isHighBurn && alert.types.includes('low_burn') && (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-700 text-white shadow-2xs">
+                              <TrendingDown className="w-3.5 h-3.5" />
+                              Low Burn Alert: Slow-Moving ({alert.burnRatePercent.toFixed(1)}% &lt; 20%)
                             </span>
                           )}
                           {!isBoth && isApproachingEnd && (
@@ -887,8 +1053,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <tbody className="divide-y divide-slate-100">
               {accessibleProjects.map((p) => {
                 const burnRate = p.budgetSummary.burnRatePercent;
-                const isSlowBurn = burnRate < 50;
-                const isOptimal = burnRate >= 60 && burnRate <= 85;
+                const isVeryLowBurn = burnRate < 20;
+                const isSlowBurn = burnRate >= 20 && burnRate < 50;
+                const isOptimal = burnRate >= 50 && burnRate <= 85;
+                const isHighBurn = burnRate > 90;
 
                 return (
                   <tr
@@ -897,7 +1065,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     className="hover:bg-slate-50/80 cursor-pointer transition-colors"
                   >
                     <td className="py-2.5 px-3">
-                      <div className="font-semibold text-slate-900">{p.shortTitle}</div>
+                      <div className="flex items-center gap-1.5 font-semibold text-slate-900">
+                        <span>{p.shortTitle}</span>
+                        {isVeryLowBurn && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800 border border-cyan-300">
+                            &lt;20% Low Burn
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[11px] text-slate-500 font-mono">{p.code}</div>
                     </td>
                     <td className="py-2.5 px-3 text-slate-700 font-medium">{p.donorName}</td>
@@ -918,27 +1093,49 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                           <div
                             className={`h-2 rounded-full ${
-                              isOptimal ? 'bg-emerald-600' : isSlowBurn ? 'bg-amber-500' : 'bg-blue-600'
+                              isHighBurn
+                                ? 'bg-rose-600'
+                                : isVeryLowBurn
+                                ? 'bg-cyan-600'
+                                : isOptimal
+                                ? 'bg-emerald-600'
+                                : isSlowBurn
+                                ? 'bg-amber-500'
+                                : 'bg-blue-600'
                             }`}
                             style={{ width: `${Math.min(100, burnRate)}%` }}
                           />
                         </div>
-                        <span className="font-mono tabular-nums text-[11px] font-semibold text-slate-800 shrink-0">
+                        <span className={`font-mono tabular-nums text-[11px] font-semibold shrink-0 ${
+                          isVeryLowBurn ? 'text-cyan-800 font-bold' : isHighBurn ? 'text-rose-700 font-bold' : 'text-slate-800'
+                        }`}>
                           {formatPercent(burnRate)}
                         </span>
                       </div>
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                          isOptimal
-                            ? 'bg-emerald-100 text-emerald-800'
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                          isVeryLowBurn
+                            ? 'bg-cyan-50 text-cyan-900 border-cyan-300 font-bold'
+                            : isHighBurn
+                            ? 'bg-rose-100 text-rose-800 border-rose-300 font-bold'
+                            : isOptimal
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
                             : isSlowBurn
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-blue-100 text-blue-800'
+                            ? 'bg-amber-100 text-amber-800 border-amber-200'
+                            : 'bg-blue-100 text-blue-800 border-blue-200'
                         }`}
                       >
-                        {isOptimal ? 'On Schedule' : isSlowBurn ? 'Under-utilized' : 'Advanced'}
+                        {isVeryLowBurn
+                          ? 'Slow-Moving (<20%)'
+                          : isHighBurn
+                          ? 'High Burn (>90%)'
+                          : isOptimal
+                          ? 'On Schedule'
+                          : isSlowBurn
+                          ? 'Under-utilized'
+                          : 'Advanced'}
                       </span>
                     </td>
                   </tr>

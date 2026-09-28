@@ -1,6 +1,6 @@
 import { Project, SomalilandRegion } from './ngo';
 
-export type UserRole = 'Super Admin' | 'Project Manager' | 'Team Member' | 'Donor';
+export type UserRole = 'Super Admin' | 'Project Manager' | 'Team Member' | 'Donor' | 'Finance Officer';
 
 export type Permission =
   // Projects
@@ -165,6 +165,27 @@ export const ROLE_DEFINITIONS: Record<UserRole, RoleDefinition> = {
     canGenerateReports: false,
     canSubmitFieldData: false,
     dataAccessScope: 'Funded Grants Only (Read-Only)'
+  },
+  'Finance Officer': {
+    role: 'Finance Officer',
+    title: 'Senior Finance & Compliance Officer',
+    summary: 'Reviews operational expenditures, audits project vouchers against grant agreements, controls multi-currency bank ledgers, and performs final sign-offs on program expenses.',
+    permissions: [
+      'projects:view_all',
+      'tasks:view_all',
+      'financials:view_all',
+      'financials:create_voucher',
+      'financials:approve',
+      'reports:view_all',
+      'evidence:view',
+      'audit:export'
+    ],
+    canEditProjects: false,
+    canDeleteProjects: false,
+    canManageFinances: true,
+    canGenerateReports: false,
+    canSubmitFieldData: false,
+    dataAccessScope: 'Global (All Projects & Donors)'
   }
 };
 
@@ -236,5 +257,16 @@ export const MOCK_USERS: User[] = [
     assignedProjectIds: ['proj-02'],
     donorId: 'donor-danida',
     avatarInitials: 'LM'
+  },
+  {
+    id: 'user-07',
+    name: 'Mustafa Omar Aden',
+    email: 'm.aden@penha-hargeisa.org',
+    role: 'Finance Officer',
+    jobTitle: 'Senior Financial Comptroller & Compliance Manager',
+    organization: 'PENHA Somaliland Country Office',
+    baseOffice: 'Hargeisa Head Office',
+    assignedProjectIds: ['*'],
+    avatarInitials: 'MO'
   }
 ];

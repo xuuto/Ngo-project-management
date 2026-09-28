@@ -9,7 +9,8 @@ import {
   ActivityModal,
   IndicatorModal,
   BudgetLineModal,
-  EvidenceModal
+  EvidenceModal,
+  MilestoneModal
 } from './features/projects';
 import {
   FinanceSection,
@@ -21,6 +22,7 @@ import { DonorsView } from './features/donors';
 import {
   DonorReportsView,
   PrintableDonorReport,
+  PrintableExecutiveBriefing,
   ReportGeneratorModal
 } from './features/reporting';
 import {
@@ -28,6 +30,14 @@ import {
   BeneficiaryModal,
   DisbursementModal
 } from './features/beneficiaries';
+import {
+  RiskManagementView,
+  AddRiskModal
+} from './features/risks';
+import { RegionalMapImpactView } from './components/RegionalMapImpactView';
+import { AuditComplianceView } from './components/AuditComplianceView';
+import { DocumentManagementView } from './components/DocumentManagementView';
+import { ApprovalWorkflowView } from './components/ApprovalWorkflowView';
 
 import {
   Project,
@@ -40,10 +50,24 @@ import {
   Activity,
   Indicator,
   FieldEvidence,
-  BudgetLineItem
+  BudgetLineItem,
+  RiskItem,
+  RiskStatus,
+  Milestone,
+  MilestoneStatus
 } from './types/ngo';
+import { MilestoneNotification } from './types/notification';
 import { Beneficiary, DisbursementRecord } from './types/beneficiary';
 import { BankAccount, FinancialCommitment, ProcurementOrder, FieldImprestAccount } from './types/finance';
+import { MilestoneAlertsModal } from './components/modals/MilestoneAlertsModal';
+import { ToastNotification } from './components/ToastNotification';
+import {
+  runDailyMilestoneCheck,
+  getStoredNotifications,
+  saveStoredNotifications,
+  getLastCheckDate,
+  toggleNotificationUrgent
+} from './services/milestoneChecker';
 
 import {
   getStoredProjects,
@@ -92,6 +116,7 @@ const MainApp: React.FC = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [currencyMode, setCurrencyMode] = useState<'USD' | 'SLSH'>('USD');
   const [activePrintableReport, setActivePrintableReport] = useState<DonorReport | null>(null);
+  const [isExecutivePDFOpen, setIsExecutivePDFOpen] = useState(false);
 
   // Modals
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -104,12 +129,83 @@ const MainApp: React.FC = () => {
   const [isBeneficiaryModalOpen, setIsBeneficiaryModalOpen] = useState(false);
   const [isDisbursementModalOpen, setIsDisbursementModalOpen] = useState(false);
   const [disbursementBeneficiaryId, setDisbursementBeneficiaryId] = useState<string | undefined>(undefined);
+  const [isAddRiskModalOpen, setIsAddRiskModalOpen] = useState(false);
+  const [riskModalProjectId, setRiskModalProjectId] = useState<string | undefined>(undefined);
+  const [editingRisk, setEditingRisk] = useState<RiskItem | null>(null);
+
+  // Milestone Modals & State
+  const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
+  const [milestoneModalProjectId, setMilestoneModalProjectId] = useState<string | undefined>(undefined);
+  const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
+
+  // Background Milestone Evaluation & PM Visual Notifications State
+  const [notifications, setNotifications] = useState<MilestoneNotification[]>(() => getStoredNotifications());
+  const [isMilestoneAlertsModalOpen, setIsMilestoneAlertsModalOpen] = useState(false);
+  const [isToastVisible, setIsToastVisible] = useState(false);
+  const [toastNewCount, setToastNewCount] = useState(0);
+  const [lastCheckDateStr, setLastCheckDateStr] = useState<string | null>(() => getLastCheckDate());
 
   // Sub-entity Modals
   const [activityModalData, setActivityModalData] = useState<{ projectId: string; outputId: string } | null>(null);
   const [indicatorModalData, setIndicatorModalData] = useState<{ projectId: string; outputId: string } | null>(null);
   const [evidenceProjectId, setEvidenceProjectId] = useState<string | null>(null);
   const [budgetLineProjectId, setBudgetLineProjectId] = useState<string | null>(null);
+
+  // Execute daily background check on app load
+  useEffect(() => {
+    const result = runDailyMilestoneCheck(projects, '2026-09-27');
+    if (result.updatedProjects !== projects) {
+      setProjects(result.updatedProjects);
+    }
+    setNotifications(result.notifications);
+    setLastCheckDateStr(result.checkDate);
+    if (result.notifications.length > 0) {
+      setToastNewCount(result.newlyDetectedCount);
+      setIsToastVisible(true);
+    }
+  }, []);
+
+  const handleRunDailyCheck = () => {
+    const result = runDailyMilestoneCheck(projects, '2026-09-27');
+    setProjects(result.updatedProjects);
+    setNotifications(result.notifications);
+    setLastCheckDateStr(result.checkDate);
+    setToastNewCount(result.newlyDetectedCount);
+    setIsToastVisible(true);
+  };
+
+  const handleMarkNotifRead = (id: string) => {
+    const updated = notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
+    setNotifications(updated);
+    saveStoredNotifications(updated);
+  };
+
+  const handleMarkAllNotifRead = () => {
+    const updated = notifications.map((n) => ({ ...n, read: true }));
+    setNotifications(updated);
+    saveStoredNotifications(updated);
+  };
+
+  const handleAcknowledgeNotif = (id: string) => {
+    const updated = notifications.map((n) =>
+      n.id === id
+        ? {
+            ...n,
+            acknowledged: true,
+            read: true,
+            acknowledgedBy: currentUser.name,
+            acknowledgedAt: new Date().toISOString()
+          }
+        : n
+    );
+    setNotifications(updated);
+    saveStoredNotifications(updated);
+  };
+
+  const handleToggleUrgent = (id: string) => {
+    const updated = toggleNotificationUrgent(id);
+    setNotifications(updated);
+  };
 
   // Sync to localStorage
   useEffect(() => {
@@ -583,6 +679,127 @@ const MainApp: React.FC = () => {
     );
   };
 
+  const handleSaveRisk = (risk: RiskItem, projId: string) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
+        if (proj.id !== projId) return proj;
+        const exists = proj.risks.some((rk) => rk.id === risk.id);
+        const updatedRisks = exists
+          ? proj.risks.map((rk) => (rk.id === risk.id ? risk : rk))
+          : [risk, ...proj.risks];
+
+        return {
+          ...proj,
+          risks: updatedRisks
+        };
+      })
+    );
+  };
+
+  const handleDeleteRisk = (riskId: string, projId: string) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
+        if (proj.id !== projId) return proj;
+        return {
+          ...proj,
+          risks: proj.risks.filter((rk) => rk.id !== riskId)
+        };
+      })
+    );
+  };
+
+  const handleUpdateRiskStatus = (riskId: string, projId: string, status: RiskStatus) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
+        if (proj.id !== projId) return proj;
+        return {
+          ...proj,
+          risks: proj.risks.map((rk) => (rk.id === riskId ? { ...rk, status } : rk))
+        };
+      })
+    );
+  };
+
+  const handleOpenAddRiskModal = (projId?: string) => {
+    setRiskModalProjectId(projId);
+    setEditingRisk(null);
+    setIsAddRiskModalOpen(true);
+  };
+
+  const handleEditRisk = (risk: RiskItem, projId: string) => {
+    setRiskModalProjectId(projId);
+    setEditingRisk(risk);
+    setIsAddRiskModalOpen(true);
+  };
+
+  const handleSaveMilestone = (milestone: Milestone, projId: string) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
+        if (proj.id !== projId) return proj;
+        const currentMs = proj.milestones || [];
+        const exists = currentMs.some((m) => m.id === milestone.id);
+        const updatedMs = exists
+          ? currentMs.map((m) => (m.id === milestone.id ? milestone : m))
+          : [milestone, ...currentMs];
+
+        return {
+          ...proj,
+          milestones: updatedMs
+        };
+      })
+    );
+  };
+
+  const handleDeleteMilestone = (milestoneId: string, projId: string) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
+        if (proj.id !== projId) return proj;
+        return {
+          ...proj,
+          milestones: (proj.milestones || []).filter((m) => m.id !== milestoneId)
+        };
+      })
+    );
+  };
+
+  const handleUpdateMilestoneStatus = (
+    milestoneId: string,
+    projId: string,
+    status: MilestoneStatus,
+    completionDate?: string
+  ) => {
+    setProjects((prev) =>
+      prev.map((proj) => {
+        if (proj.id !== projId) return proj;
+        return {
+          ...proj,
+          milestones: (proj.milestones || []).map((m) => {
+            if (m.id === milestoneId) {
+              return {
+                ...m,
+                status,
+                completionDate: status === 'Achieved' ? (completionDate || new Date().toISOString().split('T')[0]) : undefined
+              };
+            }
+            return m;
+          })
+        };
+      })
+    );
+  };
+
+  const handleOpenMilestoneModal = (projId?: string) => {
+    setMilestoneModalProjectId(projId);
+    setEditingMilestone(null);
+    setIsMilestoneModalOpen(true);
+  };
+
+  const handleEditMilestone = (milestone: Milestone, projId: string) => {
+    setMilestoneModalProjectId(projId);
+    setEditingMilestone(milestone);
+    setIsMilestoneModalOpen(true);
+  };
+
   const handleSaveReport = (newReport: DonorReport) => {
     setReports([newReport, ...reports]);
     setActivePrintableReport(newReport);
@@ -596,6 +813,20 @@ const MainApp: React.FC = () => {
         report={activePrintableReport}
         project={proj}
         onClose={() => setActivePrintableReport(null)}
+      />
+    );
+  }
+
+  // If viewing printable executive portfolio briefing
+  if (isExecutivePDFOpen) {
+    return (
+      <PrintableExecutiveBriefing
+        projects={projects}
+        donors={donors}
+        expenses={expenses}
+        fundInflows={fundInflows}
+        currencyMode={currencyMode}
+        onClose={() => setIsExecutivePDFOpen(false)}
       />
     );
   }
@@ -617,6 +848,18 @@ const MainApp: React.FC = () => {
           setExpenseProjectId(undefined);
           setIsExpenseModalOpen(true);
         }}
+        notifications={notifications}
+        onMarkRead={handleMarkNotifRead}
+        onMarkAllRead={handleMarkAllNotifRead}
+        onAcknowledge={handleAcknowledgeNotif}
+        onSelectProject={handleSelectProject}
+        onOpenMilestoneAlertsModal={() => setIsMilestoneAlertsModalOpen(true)}
+        onRunDailyCheck={handleRunDailyCheck}
+        onMarkAchievedDirect={(msId, pId) => {
+          handleUpdateMilestoneStatus(msId, pId, 'Achieved');
+          setTimeout(() => handleRunDailyCheck(), 50);
+        }}
+        onToggleUrgent={handleToggleUrgent}
       />
 
       {/* Main Container */}
@@ -635,6 +878,7 @@ const MainApp: React.FC = () => {
               setIsReportModalOpen(true);
             }}
             onViewReport={(rep) => setActivePrintableReport(rep)}
+            onOpenExecutivePDF={() => setIsExecutivePDFOpen(true)}
             setActiveView={setActiveView}
           />
         )}
@@ -677,6 +921,25 @@ const MainApp: React.FC = () => {
                 setIsReportModalOpen(true);
               }
             }}
+            onOpenAddRiskModal={handleOpenAddRiskModal}
+            onEditRisk={handleEditRisk}
+            onDeleteRisk={handleDeleteRisk}
+            onUpdateRiskStatus={handleUpdateRiskStatus}
+            onOpenMilestoneModal={handleOpenMilestoneModal}
+            onEditMilestone={handleEditMilestone}
+            onDeleteMilestone={handleDeleteMilestone}
+            onUpdateMilestoneStatus={handleUpdateMilestoneStatus}
+          />
+        )}
+
+        {activeView === 'risks' && (
+          <RiskManagementView
+            projects={projects}
+            onOpenAddRiskModal={handleOpenAddRiskModal}
+            onEditRisk={handleEditRisk}
+            onDeleteRisk={handleDeleteRisk}
+            onUpdateRiskStatus={handleUpdateRiskStatus}
+            onSelectProject={handleSelectProject}
           />
         )}
 
@@ -741,6 +1004,36 @@ const MainApp: React.FC = () => {
               setDisbursementBeneficiaryId(bId);
               setIsDisbursementModalOpen(true);
             }}
+          />
+        )}
+
+        {activeView === 'regional-map' && (
+          <RegionalMapImpactView
+            projects={projects}
+            currencyMode={currencyMode}
+            onSelectProject={handleSelectProject}
+          />
+        )}
+
+        {activeView === 'audit' && (
+          <AuditComplianceView
+            hasAdminPrivilege={currentUser.role === 'Super Admin' || currentUser.role === 'Project Manager'}
+          />
+        )}
+
+        {activeView === 'documents' && (
+          <DocumentManagementView
+            projects={projects}
+            currentUser={currentUser}
+            onSelectProject={handleSelectProject}
+          />
+        )}
+
+        {activeView === 'approvals' && (
+          <ApprovalWorkflowView
+            projects={projects}
+            currentUser={currentUser}
+            currencyMode={currencyMode}
           />
         )}
       </main>
@@ -855,6 +1148,53 @@ const MainApp: React.FC = () => {
         projects={projects}
         preselectedBeneficiaryId={disbursementBeneficiaryId}
         onSaveDisbursement={handleAddDisbursement}
+      />
+
+      <AddRiskModal
+        isOpen={isAddRiskModalOpen}
+        onClose={() => {
+          setIsAddRiskModalOpen(false);
+          setEditingRisk(null);
+          setRiskModalProjectId(undefined);
+        }}
+        projects={projects}
+        defaultProjectId={riskModalProjectId}
+        onSaveRisk={handleSaveRisk}
+        initialRisk={editingRisk}
+      />
+
+      <MilestoneModal
+        isOpen={isMilestoneModalOpen}
+        onClose={() => {
+          setIsMilestoneModalOpen(false);
+          setEditingMilestone(null);
+          setMilestoneModalProjectId(undefined);
+        }}
+        projects={projects}
+        defaultProjectId={milestoneModalProjectId}
+        onSaveMilestone={handleSaveMilestone}
+        initialMilestone={editingMilestone}
+      />
+
+      <MilestoneAlertsModal
+        isOpen={isMilestoneAlertsModalOpen}
+        onClose={() => setIsMilestoneAlertsModalOpen(false)}
+        notifications={notifications}
+        projects={projects}
+        onUpdateMilestoneStatus={handleUpdateMilestoneStatus}
+        onSaveMilestone={handleSaveMilestone}
+        onSelectProject={handleSelectProject}
+        onRunDailyCheck={handleRunDailyCheck}
+        lastCheckDate={lastCheckDateStr}
+        onToggleUrgent={handleToggleUrgent}
+      />
+
+      <ToastNotification
+        isVisible={isToastVisible}
+        onClose={() => setIsToastVisible(false)}
+        overdueCount={notifications.length}
+        newCount={toastNewCount}
+        onOpenNotifications={() => setIsMilestoneAlertsModalOpen(true)}
       />
     </div>
   );

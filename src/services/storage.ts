@@ -27,7 +27,33 @@ export const getStoredProjects = (): Project[] => {
       localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(INITIAL_PROJECTS));
       return INITIAL_PROJECTS;
     }
-    return JSON.parse(raw);
+    const parsed: Project[] = JSON.parse(raw);
+    // Ensure newly added initial projects like proj-05 are present
+    const existingIds = new Set(parsed.map(p => p.id));
+    let updated = false;
+    INITIAL_PROJECTS.forEach(initP => {
+      if (!existingIds.has(initP.id)) {
+        parsed.push(initP);
+        updated = true;
+      }
+    });
+    // Ensure all projects have milestones populated
+    parsed.forEach(p => {
+      if (!p.milestones || p.milestones.length === 0) {
+        const initP = INITIAL_PROJECTS.find(ip => ip.id === p.id);
+        if (initP && initP.milestones && initP.milestones.length > 0) {
+          p.milestones = initP.milestones;
+          updated = true;
+        } else if (!p.milestones) {
+          p.milestones = [];
+          updated = true;
+        }
+      }
+    });
+    if (updated) {
+      localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch (e) {
     console.error('Error reading projects from storage:', e);
     return INITIAL_PROJECTS;
@@ -49,7 +75,19 @@ export const getStoredDonors = (): Donor[] => {
       localStorage.setItem(STORAGE_KEYS.DONORS, JSON.stringify(INITIAL_DONORS));
       return INITIAL_DONORS;
     }
-    return JSON.parse(raw);
+    const parsed: Donor[] = JSON.parse(raw);
+    const existingIds = new Set(parsed.map(d => d.id));
+    let updated = false;
+    INITIAL_DONORS.forEach(initD => {
+      if (!existingIds.has(initD.id)) {
+        parsed.push(initD);
+        updated = true;
+      }
+    });
+    if (updated) {
+      localStorage.setItem(STORAGE_KEYS.DONORS, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch (e) {
     console.error('Error reading donors:', e);
     return INITIAL_DONORS;

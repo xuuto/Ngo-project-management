@@ -85,6 +85,27 @@ export const INITIAL_DONORS: Donor[] = [
       'Cluster 5W Reporting Submission'
     ],
     fiscalYearEnd: '31 December'
+  },
+  {
+    id: 'donor-sdc',
+    name: 'Swiss Agency for Development and Cooperation (SDC)',
+    shortName: 'SDC (Switzerland)',
+    code: 'SDC-CH',
+    country: 'Switzerland / Federal Department of Foreign Affairs',
+    contactPerson: 'Marc Steiner (Regional Horn of Africa Lead)',
+    contactEmail: 'marc.steiner@eda.admin.ch',
+    phone: '+41 58 462 21 11',
+    currency: 'USD',
+    activeGrantsCount: 1,
+    totalCommittedUSD: 750000,
+    totalDisbursedUSD: 300000,
+    totalSpentUSD: 98500,
+    reportingRequirements: [
+      'SDC Results-Oriented Semi-Annual Progress Report',
+      'Cross-Border Pastoral Mobility Risk & Conflict Matrix',
+      'Veterinary Cold-Chain Temperature & Stock Ledger'
+    ],
+    fiscalYearEnd: '31 December'
   }
 ];
 
@@ -400,6 +421,103 @@ export const INITIAL_PROJECTS: Project[] = [
         mitigationPlan: 'Signed customary Xeer agreements between neighboring clans and paid community peace scout surveillance.',
         status: 'Active Monitoring'
       }
+    ],
+    milestones: [
+      {
+        id: 'ms-01-1',
+        projectId: 'proj-01',
+        title: 'Baseline Socio-Ecological & GIS Rangeland Polygon Mapping',
+        description: 'Establish baseline satellite NDVI metrics and register ground GPS polygons across 3,200 ha with Somaliland MoAD.',
+        dueDate: '2024-04-30',
+        completionDate: '2024-04-25',
+        status: 'Achieved',
+        category: 'M&E Review',
+        assignedLead: 'Eng. Ismail Jama Farah',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'MoAD signed GIS map polygon archive & baseline survey sign-off',
+        notes: 'Completed ahead of schedule with 100% boundary consensus.'
+      },
+      {
+        id: 'ms-01-2',
+        projectId: 'proj-01',
+        title: 'Procurement & Quality Certification of 12MT Indigenous Pasture Seeds',
+        description: 'Bulk procurement and germination testing of Cenchrus ciliaris and Chrysopogon plumulosus seed lots.',
+        dueDate: '2024-07-31',
+        completionDate: '2024-07-20',
+        status: 'Achieved',
+        category: 'Procurement & Works',
+        assignedLead: 'Mohamed Nur (Agronomist)',
+        isCriticalCheckpoint: false,
+        verificationCriteria: 'Seed laboratory germination test certificates (>85% viability)',
+        notes: 'Quality verified at Burao dryland research station.'
+      },
+      {
+        id: 'ms-01-3',
+        projectId: 'proj-01',
+        title: 'Formation & Legal Charter Ratification of 24 CRMCs (40% Women)',
+        description: 'Community Rangeland Management Committees established with customary bylaws signed by village elders and district commissioners.',
+        dueDate: '2025-01-15',
+        completionDate: '2025-01-10',
+        status: 'Achieved',
+        category: 'Community Handover',
+        assignedLead: 'Fadumo Abdi Warsame',
+        isCriticalCheckpoint: true,
+        verificationCriteria: '24 signed committee charters with women quota verification',
+        notes: '132 female committee leaders actively seated.'
+      },
+      {
+        id: 'ms-01-4',
+        projectId: 'proj-01',
+        title: 'Construction of 3,200ha Soil-Bunding & Contour Check-Dams',
+        description: 'Cash-for-work completion of semi-circular micro-catchments and gully stone check-dams in Gabiley and Sheikh buffer zones.',
+        dueDate: '2025-09-30',
+        completionDate: '2025-09-28',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Eng. Ismail Jama Farah',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Drone aerial mosaic verification and engineering completion sign-off',
+        notes: '2,750 ha certified by MoAD engineers.'
+      },
+      {
+        id: 'ms-01-5',
+        projectId: 'proj-01',
+        title: 'Solar Water Retrofitting & Pump Telemetry Commissioning (18 Points)',
+        description: 'Install Grundfos solar submersible pumps and smart digital flow telemetry across strategic communal pastoral berkads.',
+        dueDate: '2026-05-15',
+        status: 'In Progress',
+        category: 'Key Delivery',
+        assignedLead: 'Eng. Ismail Jama Farah',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Ministry of Water commissioning certificates & water quality test deeds',
+        notes: '15 of 18 water points operational; final 3 under installation.'
+      },
+      {
+        id: 'ms-01-6',
+        projectId: 'proj-01',
+        title: 'Independent Mid-Term Evaluation & EU Third-Party Field Audit',
+        description: 'Mandatory EU Annex III verification audit and external pastoralist resilience impact evaluation.',
+        dueDate: '2026-10-15',
+        status: 'Pending',
+        category: 'M&E Review',
+        assignedLead: 'Eng. Ismail Jama Farah',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'External evaluator published report & EU clearance letter',
+        notes: 'Auditor terms of reference drafted and approved by EU delegation.'
+      },
+      {
+        id: 'ms-01-7',
+        projectId: 'proj-01',
+        title: 'Final Communal Grazing Asset Handover to Village Councils',
+        description: 'Formal transition of rehabilitated pasture reserves and solar equipment to community rangeland trusts.',
+        dueDate: '2026-11-20',
+        status: 'Pending',
+        category: 'Community Handover',
+        assignedLead: 'Fadumo Abdi Warsame',
+        isCriticalCheckpoint: false,
+        verificationCriteria: 'Signed district transfer protocols & operational sustainability pacts',
+        notes: 'Scheduled alongside end-of-grant closeout forum.'
+      }
     ]
   },
   {
@@ -628,6 +746,77 @@ export const INITIAL_PROJECTS: Project[] = [
         category: 'Environmental / Drought',
         mitigationPlan: 'Heavy-duty dust sealed IP67 enclosures and backup auxiliary diesel generator on standby.',
         status: 'Mitigated'
+      }
+    ],
+    milestones: [
+      {
+        id: 'ms-02-1',
+        projectId: 'proj-02',
+        title: 'Baseline Gender Assessment & Cooperative Membership Registry',
+        description: 'Enumerate and verify 320 pastoralist women milk producers and formalize VSLA credit groups in Sahil & Sanaag.',
+        dueDate: '2024-06-30',
+        completionDate: '2024-06-20',
+        status: 'Achieved',
+        category: 'Field Checkpoint',
+        assignedLead: 'Sahra Hassan Dirie',
+        isCriticalCheckpoint: false,
+        verificationCriteria: 'Signed member rosters and VSLA passbook baseline audit',
+        notes: '320 pastoralist women enrolled across 3 district hubs.'
+      },
+      {
+        id: 'ms-02-2',
+        projectId: 'proj-02',
+        title: 'Procurement & Installation of 3 Solar Milk Chilling Centers',
+        description: 'Complete civil works, solar PV arrays, and refrigerated bulk tank commissioning in Sheikh, Berbera, and Erigavo.',
+        dueDate: '2025-03-31',
+        completionDate: '2025-03-25',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Khadra Omer Nuur',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Refrigeration temperature data logs (<4°C continuous) & ministry inspection sign-offs',
+        notes: 'All 3 chilling hubs operational and chilling >1,800L daily.'
+      },
+      {
+        id: 'ms-02-3',
+        projectId: 'proj-02',
+        title: 'Food Hygiene Certification & Quality Testing Protocol Setup',
+        description: 'Deploy electronic milk lactoscan analyzers, somatic cell counters, and hygiene certifications with Ministry of Livestock.',
+        dueDate: '2025-08-31',
+        completionDate: '2025-08-20',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Sahra Hassan Dirie',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Ministry quality compliance certificates & zero-spoilage QA logbooks',
+        notes: 'Pasteurization readiness standard reached.'
+      },
+      {
+        id: 'ms-02-4',
+        projectId: 'proj-02',
+        title: 'Sustainable Frankincense Resin Value Chain & Direct Exporter Offtake Agreement',
+        description: 'Establish ethical tapping standards in Sanaag highland forests and sign fair-trade export contracts with certified aroma buyers.',
+        dueDate: '2026-06-30',
+        completionDate: '2026-06-15',
+        status: 'Achieved',
+        category: 'Donor Deliverable',
+        assignedLead: 'Sahra Hassan Dirie',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Executed commercial purchase agreements & fair-trade certification audit',
+        notes: 'Direct export contract secured at $18.50/kg premium price.'
+      },
+      {
+        id: 'ms-02-5',
+        projectId: 'proj-02',
+        title: 'Final Danida Results-Based Management (RBM) Audit & Cooperative Autonomy Handover',
+        description: 'Transition cooperative governance, financial accounts, and solar equipment assets to independent women executive boards.',
+        dueDate: '2026-10-25',
+        status: 'In Progress',
+        category: 'Community Handover',
+        assignedLead: 'Sahra Hassan Dirie',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'External Danida RBM audit report & signed asset transfer deeds',
+        notes: 'Cooperative financial audit underway; final governance forum in October.'
       }
     ]
   },
@@ -868,6 +1057,90 @@ export const INITIAL_PROJECTS: Project[] = [
         mitigationPlan: 'Bulk framework contracts with pre-negotiated freight rate ceilings for all humanitarian supplies.',
         status: 'Mitigated'
       }
+    ],
+    milestones: [
+      {
+        id: 'ms-03-1',
+        projectId: 'proj-03',
+        title: 'Hydrogeological Step-Testing & Aquifer Yield Mapping in Sool/Sanaag',
+        description: 'Comprehensive geophysical scanning and continuous 72-hour pumping step tests across 14 target borehole sites.',
+        dueDate: '2024-05-15',
+        completionDate: '2024-05-10',
+        status: 'Achieved',
+        category: 'Field Checkpoint',
+        assignedLead: 'Eng. Abdillahi Warsame Muse',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Ministry of Water certified hydrogeological aquifer logs & yield curves',
+        notes: 'Aquifer replenishment verified adequate for solar pumping.'
+      },
+      {
+        id: 'ms-03-2',
+        projectId: 'proj-03',
+        title: 'Emergency Frontloaded Procurement of 14 Grundfos Solar Inverters & DC Pumps',
+        description: 'International procurement and customs clearance of submersible pumps, stainless risers, and solar inverters.',
+        dueDate: '2024-09-30',
+        completionDate: '2024-09-20',
+        status: 'Achieved',
+        category: 'Procurement & Works',
+        assignedLead: 'Yusuf Hassan Hirsi',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Customs release bill of lading & warehouse receiving inspection tally',
+        notes: 'Delivered to Burao central logistics depot without transit damage.'
+      },
+      {
+        id: 'ms-03-3',
+        projectId: 'proj-03',
+        title: 'Commissioning of 11 Strategic Deep Solar Boreholes with IoT Flowmeters',
+        description: 'Civil works, solar array mounting, security fencing, and cellular flowmeter telemetry installation.',
+        dueDate: '2025-06-30',
+        completionDate: '2025-06-18',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Eng. Abdillahi Warsame Muse',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Telemetry live feed online & Ministry of Water commissioning deed',
+        notes: '11 stations streaming real-time water extraction data.'
+      },
+      {
+        id: 'ms-03-4',
+        projectId: 'proj-03',
+        title: 'Emergency Fodder Reserve Stockpiling (620MT delivered)',
+        description: 'Procure, transport, and stack 800MT of dryland Rhodes grass hay bales into Ainabo & Taleh community reserves.',
+        dueDate: '2025-12-15',
+        completionDate: '2025-12-10',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Yusuf Hassan Hirsi',
+        isCriticalCheckpoint: false,
+        verificationCriteria: 'Warehouse stock intake ledger and moisture quality test reports',
+        notes: '620MT secured in warehouse; balance in procurement pipeline.'
+      },
+      {
+        id: 'ms-03-5',
+        projectId: 'proj-03',
+        title: 'Final 3 High-Yield Solar Borehole Retrofits in Taleh & Remote Buffer Zones',
+        description: 'Deploy deep well pumping equipment in high-stress drought zones to ensure non-stop livestock watering.',
+        dueDate: '2026-04-15',
+        status: 'In Progress',
+        category: 'Key Delivery',
+        assignedLead: 'Eng. Abdillahi Warsame Muse',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Engineering pumping sign-off and community water committee handover',
+        notes: 'Civil construction 80% complete; inverter testing scheduled.'
+      },
+      {
+        id: 'ms-03-6',
+        projectId: 'proj-03',
+        title: 'FCDO Final Humanitarian Value for Money (VfM) Return & Asset Handover',
+        description: 'Full cost-efficiency benchmark submission and transfer of water facilities to regional Water Authorities.',
+        dueDate: '2026-08-20',
+        status: 'Pending',
+        category: 'Donor Deliverable',
+        assignedLead: 'Eng. Abdillahi Warsame Muse',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'FCDO final grant sign-off and signed regional water transfer pact',
+        notes: 'Closeout roadmap approved with local administration.'
+      }
     ]
   },
   {
@@ -1061,7 +1334,367 @@ export const INITIAL_PROJECTS: Project[] = [
         riskLevel: 'Medium',
         category: 'Environmental / Drought',
         mitigationPlan: 'Community pest scouts trained with Somaliland Ministry of Agricultural Development mobile reporting app.',
-        status: 'Active Monitoring'
+        status: 'Active Monitoring',
+        likelihood: 'Possible',
+        impact: 'Moderate',
+        humanitarianImpactArea: 'Food & Fodder Delivery',
+        assignedFocalPoint: 'Mustafe Ismail Nur',
+        dateIdentified: '2024-06-15',
+        earlyWarningTriggers: 'FAO Desert Locust Early Warning bulletins and regional swarming alerts'
+      }
+    ],
+    milestones: [
+      {
+        id: 'ms-04-1',
+        projectId: 'proj-04',
+        title: 'Agro-Ecological Baseline Survey & FFS Formation',
+        description: 'Conduct soil moisture profiling and establish 24 Farmer Field Schools in Dilla, Borama, and Gabiley.',
+        dueDate: '2024-07-31',
+        completionDate: '2024-07-25',
+        status: 'Achieved',
+        category: 'M&E Review',
+        assignedLead: 'Dr. Marian Abdirahman',
+        isCriticalCheckpoint: false,
+        verificationCriteria: 'FFS registration deeds & baseline yield survey report',
+        notes: '24 groups formed with 480 agro-pastoralist participants.'
+      },
+      {
+        id: 'ms-04-2',
+        projectId: 'proj-04',
+        title: 'Foundation Seed Procurement & Distribution (El-Gadde Sorghum)',
+        description: 'Distribute 1,200kg certified drought-tolerant El-Gadde seed batches and animal-drawn rippers to 2,400 farmers.',
+        dueDate: '2024-11-30',
+        completionDate: '2024-11-15',
+        status: 'Achieved',
+        category: 'Procurement & Works',
+        assignedLead: 'Mustafe Ismail Nur',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Farmer receipt signature sheets & seed certification certificates',
+        notes: '100% target distribution completed ahead of planting rains.'
+      },
+      {
+        id: 'ms-04-3',
+        projectId: 'proj-04',
+        title: 'Contour Tillage & Vegetative Moisture Strips Across 1,500 Hectares',
+        description: 'Establish contour swales, vetiver grass hedgerows, and moisture retention micro-ridges on smallholder farms.',
+        dueDate: '2025-10-31',
+        completionDate: '2025-10-20',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Dr. Marian Abdirahman',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'GPS farm register & agronomic extension verification deeds',
+        notes: '1,540 ha mapped with GIS ground polygons.'
+      },
+      {
+        id: 'ms-04-4',
+        projectId: 'proj-04',
+        title: 'Mid-Term Crop Cut Harvest Sampling & Post-Harvest Storage Training',
+        description: 'Standard crop-cut sample plots and hermetic grain bag distribution to halt post-harvest weevil infestation.',
+        dueDate: '2026-04-30',
+        completionDate: '2026-04-20',
+        status: 'Achieved',
+        category: 'Field Checkpoint',
+        assignedLead: 'Mustafe Ismail Nur',
+        isCriticalCheckpoint: false,
+        verificationCriteria: 'Crop yield statistical audit & training attendance sheets',
+        notes: '42% yield gain verified in treated plots.'
+      },
+      {
+        id: 'ms-04-5',
+        projectId: 'proj-04',
+        title: 'Agro-Pastoral Cooperative Grain Silo Certification & FAO Cluster Submission',
+        description: 'Commission communal dry storage silos in Dilla and submit verified 5W matrix and final LoA report to FAO.',
+        dueDate: '2026-11-30',
+        status: 'In Progress',
+        category: 'Donor Deliverable',
+        assignedLead: 'Dr. Marian Abdirahman',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'FAO LoA technical clearance & silo structural handover certificate',
+        notes: 'Final reporting drafted; silo finishing works in progress.'
+      }
+    ]
+  },
+  {
+    id: 'proj-05',
+    code: 'PENHA-SOM-2026-SDC05',
+    title: 'Cross-Border Pastoralist Veterinary Surveillance & Camel Health Corridor Project',
+    shortTitle: 'Cross-Border Camel Health & Mobility (SDC)',
+    donorId: 'donor-sdc',
+    donorName: 'SDC (Switzerland)',
+    grantAgreementCode: 'SDC-HA-8109-SOM',
+    pillar: 'Livestock Health & Fodder Security',
+    status: 'Active',
+    startDate: '2024-06-01',
+    endDate: '2026-12-31',
+    reportingFrequency: 'Bi-Annual',
+    nextDonorReportDate: '2026-11-30',
+    targetRegions: ['Awdal', 'Togdheer', 'Sool'],
+    targetDistricts: ['Zeila', 'Lughaya', 'Burao', 'Ainabo'],
+    leadProjectManager: {
+      name: 'Dr. Guleed Abdi Hassan',
+      role: 'Chief Veterinary Epidemiologist',
+      email: 'g.hassan@penha-hargeisa.org',
+      phone: '+252 63 445 1198'
+    },
+    fieldCoordinator: {
+      name: 'Hamda Jama Duale',
+      baseOffice: 'Borama Sub-office',
+      phone: '+252 63 418 7720'
+    },
+    budgetSummary: {
+      totalGrantUSD: 750000,
+      disbursedUSD: 300000,
+      expendituresUSD: 98500,
+      commitmentsUSD: 24000,
+      remainingBalanceUSD: 651500,
+      burnRatePercent: 13.13
+    },
+    logframe: {
+      impactGoal: 'Protect 180,000 pastoral camels and sheep from transboundary epidemic diseases through Community Animal Health Worker (CAHW) networks and cold-chain vaccine hubs across Somaliland border corridors.',
+      outcomes: [
+        {
+          id: 'oc-5-1',
+          code: 'OC-1',
+          title: 'Transboundary livestock disease surveillance and cold-chain vaccine delivery established in remote grazing corridors.',
+          outputs: [
+            {
+              id: 'out-5-1',
+              code: 'OUT-1.1',
+              title: '60 Community Animal Health Workers (CAHWs) equipped with solar vaccine cold-boxes and rapid diagnostic test kits.',
+              targetCompletionDate: '2026-06-30',
+              indicators: [
+                {
+                  id: 'ind-5.1.1',
+                  code: 'IND-1.1.1',
+                  outputId: 'out-5-1',
+                  description: 'Head of pastoral livestock vaccinated against Camel Pox, CCPP, and PPR along migration routes',
+                  unit: 'Animals',
+                  baseline: 0,
+                  target: 85000,
+                  currentActual: 18200,
+                  midtermTarget: 40000,
+                  meansOfVerification: 'Ministry of Livestock digital vaccination certificates and cold-chain batch logs',
+                  frequency: 'Monthly',
+                  dataCollectionMethod: 'CAHW smartphone e-voucher recording',
+                  status: 'Delayed',
+                  disaggregationNote: '12,000 camels, 6,200 small ruminants'
+                }
+              ],
+              activities: [
+                {
+                  id: 'act-5.1.1',
+                  outputId: 'out-5-1',
+                  code: 'ACT-1.1.1',
+                  title: 'Procure solar DC cold chain freezers and specialized veterinary drug batches from certified international suppliers',
+                  description: 'International tender for WHO/WOAH pre-qualified vaccines and Dometic solar vaccine coolers.',
+                  assignedTo: 'Dr. Guleed Abdi Hassan',
+                  assignedRole: 'Lead Veterinarian',
+                  location: 'Zeila, Lughaya and Ainabo veterinary posts',
+                  region: 'Awdal',
+                  district: 'Zeila',
+                  startDate: '2024-07-01',
+                  endDate: '2026-04-30',
+                  status: 'Delayed',
+                  budgetAllocatedUSD: 280000,
+                  budgetSpentUSD: 42000,
+                  progressPercent: 25
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    budgetLines: [
+      {
+        id: 'bl-501',
+        code: 'BL-100',
+        category: 'Direct Program Inputs & Works',
+        description: 'Procurement of vaccines, solar coolboxes, and rapid test kits',
+        unit: 'Kit/Batches',
+        quantity: 60,
+        unitCostUSD: 4500,
+        totalAllocatedUSD: 270000,
+        spentUSD: 38000,
+        notes: 'Delayed due to port clearance bottleneck at Berbera customs'
+      },
+      {
+        id: 'bl-502',
+        code: 'BL-200',
+        category: 'Community Training & Workshops',
+        description: 'CAHW certification and refresher courses with Ministry of Livestock',
+        unit: 'Sessions',
+        quantity: 12,
+        unitCostUSD: 5000,
+        totalAllocatedUSD: 60000,
+        spentUSD: 22500
+      },
+      {
+        id: 'bl-503',
+        code: 'BL-300',
+        category: 'Operational Logistics & Transport',
+        description: 'Mobile vet team field 4x4 operations and fuel in coastal border plains',
+        unit: 'Months',
+        quantity: 18,
+        unitCostUSD: 6000,
+        totalAllocatedUSD: 108000,
+        spentUSD: 24000
+      },
+      {
+        id: 'bl-504',
+        code: 'BL-400',
+        category: 'Personnel & Field Staff',
+        description: 'Veterinary officers and field technicians salary allocation',
+        unit: 'Staff-Months',
+        quantity: 48,
+        unitCostUSD: 2500,
+        totalAllocatedUSD: 120000,
+        spentUSD: 14000
+      }
+    ],
+    beneficiaries: {
+      targetDirect: 12000,
+      actualDirect: 2850,
+      targetIndirect: 36000,
+      actualIndirect: 8400,
+      targetHouseholds: 2000,
+      actualHouseholds: 475,
+      disaggregation: {
+        pastoralistWomen: 1280,
+        pastoralistMen: 1570,
+        youthUnder25: 640,
+        elderlyHerders: 390,
+        personsWithDisabilities: 85,
+        idpReturneeHouseholds: 190
+      }
+    },
+    fieldEvidences: [
+      {
+        id: 'ev-05',
+        projectId: 'proj-05',
+        date: '2024-09-10',
+        title: 'Mobile Camel Health Screening at Zeila Coastal Grazing Hub',
+        location: 'Tokhoshi Salt Plains, Zeila District',
+        district: 'Zeila',
+        region: 'Awdal',
+        gpsCoordinates: '11.3541° N, 43.4722° E',
+        monitoredBy: 'Dr. Guleed Abdi Hassan',
+        summary: 'Inspected 620 lactating camels for Trypanosomiasis. Administered prophylactic treatments to preventing herd mortality.',
+        beneficiaryQuote: {
+          text: 'Our camels move across the border where water and pasture are green. Having veterinary scouts near the border wells saved 45 calves from sickness.',
+          speakerName: 'Awale Warsame Bullale',
+          role: 'Pastoralist Clan Elder',
+          village: 'Tokhoshi Wells'
+        },
+        verifiedStatus: 'Field Reported'
+      }
+    ],
+    risks: [
+      {
+        id: 'rk-06',
+        projectId: 'proj-05',
+        projectCode: 'PENHA-SOM-2026-SDC05',
+        projectTitle: 'Cross-Border Pastoralist Veterinary Surveillance & Camel Health Corridor Project',
+        description: 'International cold-chain vaccine supplier delay and Berbera port customs clearance backlog',
+        riskLevel: 'High',
+        category: 'Operational & Logistics',
+        mitigationPlan: 'Engaged Somaliland Ministry of Livestock fast-track humanitarian import waiver and switched to regional cold-storage depot in Djibouti.',
+        status: 'Active Monitoring',
+        likelihood: 'Likely',
+        impact: 'Critical',
+        humanitarianImpactArea: 'Medical / Cold-Chain Storage',
+        assignedFocalPoint: 'Hamda Jama Duale',
+        dateIdentified: '2024-07-20',
+        lastReviewDate: '2026-09-15',
+        earlyWarningTriggers: 'Customs dwell time exceeding 14 days; vaccine temperature datalogger threshold breached'
+      },
+      {
+        id: 'rk-07',
+        projectId: 'proj-05',
+        projectCode: 'PENHA-SOM-2026-SDC05',
+        projectTitle: 'Cross-Border Pastoralist Veterinary Surveillance & Camel Health Corridor Project',
+        description: 'Cross-border movement restrictions or tension between nomadic clans near Ethiopian border grazing corridors',
+        riskLevel: 'Medium',
+        category: 'Access & Security',
+        mitigationPlan: 'Bi-monthly cross-border peace dialogues and customary Xeer pasture sharing agreements ratified by traditional Sultan elders.',
+        status: 'Active Monitoring',
+        likelihood: 'Possible',
+        impact: 'Major',
+        humanitarianImpactArea: 'Cross-Border Access',
+        assignedFocalPoint: 'Dr. Guleed Abdi Hassan',
+        dateIdentified: '2024-08-05',
+        lastReviewDate: '2026-09-20',
+        earlyWarningTriggers: 'Clashing reports from community peace scouts or local elders council'
+      }
+    ],
+    milestones: [
+      {
+        id: 'ms-05-1',
+        projectId: 'proj-05',
+        title: 'Multi-Clan Cross-Border Grazing Dialogue & Customary Xeer Agreement',
+        description: 'Convene 6 border clan councils to establish peaceful grazing corridors and shared veterinary post protocols.',
+        dueDate: '2024-08-31',
+        completionDate: '2024-08-28',
+        status: 'Achieved',
+        category: 'Field Checkpoint',
+        assignedLead: 'Dr. Guleed Abdi Hassan',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Signed customary Xeer agreement by 12 Sultan elders and local governors',
+        notes: 'Peace accords established across Zeila and Awbare corridors.'
+      },
+      {
+        id: 'ms-05-2',
+        projectId: 'proj-05',
+        title: 'Customs Clearance & Delivery of WHO/WOAH Cold-Chain Solar Coolers',
+        description: 'Import clearance and regional dispatch of 60 Dometic portable solar cold boxes and rapid diagnostic test kits.',
+        dueDate: '2025-01-31',
+        status: 'Delayed',
+        category: 'Procurement & Works',
+        assignedLead: 'Hamda Jama Duale',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Customs clearance inspection certificate & warehouse inventory receipt',
+        notes: 'Delayed by customs tariff re-classification; fast-track waiver requested.'
+      },
+      {
+        id: 'ms-05-3',
+        projectId: 'proj-05',
+        title: 'Training & Certification of 60 Community Animal Health Workers (CAHWs)',
+        description: '14-day intensive field epidemiology, diagnostic rapid testing, and cold-chain handling certification course.',
+        dueDate: '2025-06-30',
+        completionDate: '2025-06-15',
+        status: 'Achieved',
+        category: 'Key Delivery',
+        assignedLead: 'Dr. Guleed Abdi Hassan',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Ministry of Livestock CAHW graduation certificates & exam scores',
+        notes: '60 scouts certified (including 22 female paravets).'
+      },
+      {
+        id: 'ms-05-4',
+        projectId: 'proj-05',
+        title: 'Mobile Vaccination Campaign Reaching 40,000 Head in Zeila/Lughaya',
+        description: 'Deploy 6 mobile veterinary teams for Camel Pox and PPR vaccination across dry-season concentration wells.',
+        dueDate: '2026-03-31',
+        status: 'Delayed',
+        category: 'Key Delivery',
+        assignedLead: 'Dr. Guleed Abdi Hassan',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Digital e-voucher logs & Ministry of Livestock vaccination stamp tallies',
+        notes: '18,200 animals reached; campaign delayed pending remaining vaccine batches.'
+      },
+      {
+        id: 'ms-05-5',
+        projectId: 'proj-05',
+        title: 'Veterinary Cold-Chain Hub Handover to Somaliland Ministry of Livestock',
+        description: 'Transition border outpost cold-chain storage infrastructure and diagnostic labs to district veterinary directors.',
+        dueDate: '2026-12-15',
+        status: 'Pending',
+        category: 'Community Handover',
+        assignedLead: 'Hamda Jama Duale',
+        isCriticalCheckpoint: true,
+        verificationCriteria: 'Signed inter-ministerial facility transfer deed & bilateral SDC closeout report',
+        notes: 'Facility maintenance protocol submitted to Ministry for inclusion in national budget.'
       }
     ]
   }

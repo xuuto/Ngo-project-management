@@ -13,7 +13,7 @@ export const PermissionsMatrixModal: React.FC<PermissionsMatrixModalProps> = ({ 
 
   if (!isOpen) return null;
 
-  const roles: UserRole[] = ['Super Admin', 'Project Manager', 'Team Member', 'Donor'];
+  const roles: UserRole[] = ['Super Admin', 'Project Manager', 'Team Member', 'Donor', 'Finance Officer'];
 
   const permissionRows = [
     {
@@ -168,7 +168,7 @@ export const PermissionsMatrixModal: React.FC<PermissionsMatrixModalProps> = ({ 
                 {permissionRows.map((cat, catIdx) => (
                   <React.Fragment key={cat.category}>
                     <tr className="bg-slate-100/70 font-semibold text-slate-800">
-                      <td colSpan={5} className="py-2 px-4 uppercase tracking-wider text-[10px] text-slate-600">
+                      <td colSpan={6} className="py-2 px-4 uppercase tracking-wider text-[10px] text-slate-600">
                         {cat.category}
                       </td>
                     </tr>
